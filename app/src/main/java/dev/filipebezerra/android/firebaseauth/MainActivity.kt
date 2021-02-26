@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.android.firebaseui_login_sample
+package dev.filipebezerra.android.firebaseauth
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle

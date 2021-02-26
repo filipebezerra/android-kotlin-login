@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-package com.example.android.firebaseui_login_sample
+package dev.filipebezerra.android.firebaseauth.ui.settings
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
-import androidx.navigation.fragment.findNavController
 import androidx.preference.PreferenceFragmentCompat
+import dev.filipebezerra.android.firebaseauth.R
+import dev.filipebezerra.android.firebaseauth.ui.login.LoginViewModel
 
 class SettingsFragment : PreferenceFragmentCompat() {
 

@@ -15,7 +15,7 @@
   -->
 
 <resources>
-    <string name="app_name">FirebaseLoginSample</string>
+    <string name="app_name">Firebase Auth</string>
     <string name="login_button_text">Login</string>
     <string name="logout_button_text">Logout</string>
     <string name="login_unsuccessful_msg">Login unsuccessful</string>
@@ -31,4 +31,5 @@
 
     <!--Shared Preference Keys -->
     <string name="preference_fact_type_key">fact_type_pref</string>
+    <string name="invalid_authentication">You need to complete your sign up registration!</string>
 </resources>

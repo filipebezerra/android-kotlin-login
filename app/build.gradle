@@ -16,11 +16,13 @@
 
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'com.google.gms.google-services'
 
 android {
     compileSdkVersion 30
     defaultConfig {
-        applicationId "com.example.android.firebaseui_login_sample"
+        applicationId "dev.filipebezerra.android.firebaseauth"
         minSdkVersion 19
         targetSdkVersion 30
         versionCode 1
@@ -36,10 +38,20 @@ android {
     buildFeatures {
         dataBinding true
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
+    }
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    // Kotlin support
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+
+    // AndroidX dependencies
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.activity:activity-ktx:1.1.0-alpha01'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-rc1'
@@ -51,10 +63,11 @@ dependencies {
     implementation 'androidx.navigation:navigation-fragment-ktx:2.0.0'
     implementation "androidx.navigation:navigation-ui-ktx:2.0.0"
     implementation 'androidx.preference:preference-ktx:1.1.0-rc01'
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'com.firebaseui:firebase-ui-auth:5.0.0'
 
-    testImplementation 'junit:junit:4.12'
+    // Firebase dependencies
+    implementation platform('com.google.firebase:firebase-bom:26.5.0')
+    implementation 'com.firebaseui:firebase-ui-auth:7.1.1'
+
+    // Testing dependencies
+    testImplementation 'junit:junit:4.13.2'
 }
-
-apply plugin: 'com.google.gms.google-services'

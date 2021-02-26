@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package com.example.android.firebaseui_login_sample
+package dev.filipebezerra.android.firebaseauth.ui.login
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.map
 import androidx.preference.PreferenceManager
+import dev.filipebezerra.android.firebaseauth.util.livedata.FirebaseUserLiveData
+import dev.filipebezerra.android.firebaseauth.R
 import kotlin.random.Random
 
 class LoginViewModel : ViewModel() {
@@ -44,9 +46,16 @@ class LoginViewModel : ViewModel() {
         AUTHENTICATED, UNAUTHENTICATED, INVALID_AUTHENTICATION
     }
 
-    // TODO Create an authenticationState variable based off the FirebaseUserLiveData object. By
-    //  creating this variable, other classes will be able to query for whether the user is logged
-    //  in or not
+    val authenticationState = FirebaseUserLiveData().map { currentUser ->
+        when {
+            currentUser == null -> AuthenticationState.UNAUTHENTICATED
+            currentUser.providerData.any { it.providerId == "phone" } &&
+                    (currentUser.displayName.isNullOrBlank() || currentUser.email.isNullOrBlank()) -> {
+                AuthenticationState.INVALID_AUTHENTICATION
+            }
+            else -> AuthenticationState.AUTHENTICATED
+        }
+    }
 
     /**
      * Gets a fact to display based on the user's set preference of which type of fact they want
