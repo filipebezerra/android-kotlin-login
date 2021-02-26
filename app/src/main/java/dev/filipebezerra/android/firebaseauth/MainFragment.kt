@@ -19,6 +19,7 @@ package dev.filipebezerra.android.firebaseauth
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.text.InputType
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -26,6 +27,8 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.input.input
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.IdpResponse
 import com.google.android.material.snackbar.Snackbar
@@ -33,6 +36,7 @@ import com.google.firebase.auth.FirebaseAuth
 import dev.filipebezerra.android.firebaseauth.ui.login.LoginViewModel.AuthenticationState.*
 import dev.filipebezerra.android.firebaseauth.databinding.FragmentMainBinding
 import dev.filipebezerra.android.firebaseauth.ui.login.LoginViewModel
+import dev.filipebezerra.android.firebaseauth.util.ext.setupSnackbar
 
 class MainFragment : Fragment() {
 
@@ -49,12 +53,21 @@ class MainFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_main, container, false)
+        with(binding) {
+            loginViewModel = viewModel
+            lifecycleOwner = viewLifecycleOwner
+        }
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         observeAuthenticationState()
+        view.setupSnackbar(
+            viewLifecycleOwner,
+            viewModel.snackbarText,
+            Snackbar.LENGTH_LONG
+        )
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -106,15 +119,20 @@ class MainFragment : Fragment() {
     }
 
     private fun displayInvalidAuthenticationUI() {
-        Snackbar.make(
-            binding.mainRootLayout,
-            getString(R.string.invalid_authentication),
-            Snackbar.LENGTH_SHORT
-        )
-            .setAction(android.R.string.ok) {
-
+        binding.authButton.text = getString(R.string.complete_profile_button_text)
+        binding.authButton.setOnClickListener {
+            MaterialDialog(requireContext()).show {
+                title(R.string.please_update_profile)
+                input(
+                    hintRes = R.string.display_name,
+                    inputType = InputType.TYPE_TEXT_VARIATION_PERSON_NAME or InputType.TYPE_TEXT_FLAG_CAP_WORDS,
+                ) { _, text ->
+                    viewModel.updateDisplayName(text)
+                }
+                positiveButton(R.string.update)
             }
-            .show();
+        }
+        binding.welcomeText.text = getString(R.string.invalid_authentication)
     }
 
     private fun getFactWithPersonalization(fact: String): String {

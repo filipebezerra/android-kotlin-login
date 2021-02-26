@@ -31,5 +31,12 @@
 
     <!--Shared Preference Keys -->
     <string name="preference_fact_type_key">fact_type_pref</string>
-    <string name="invalid_authentication">You need to complete your sign up registration!</string>
+
+    <string name="invalid_authentication">You need to complete your profile!</string>
+    <string name="complete_profile_button_text">Complete profile</string>
+    <string name="please_update_profile">Please complete your profile before continuing</string>
+    <string name="display_name">Display name</string>
+    <string name="profile_updated_successfully">Great! Profile updated successfully, thank you.</string>
+    <string name="profile_update_failed">Sorry! Something wrong happened, please try again.</string>
+    <string name="update">Update</string>
 </resources>

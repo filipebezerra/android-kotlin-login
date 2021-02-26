@@ -17,11 +17,18 @@
 package dev.filipebezerra.android.firebaseauth.ui.login
 
 import android.content.Context
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.map
 import androidx.preference.PreferenceManager
-import dev.filipebezerra.android.firebaseauth.util.livedata.FirebaseUserLiveData
+import com.google.firebase.auth.UserProfileChangeRequest
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import dev.filipebezerra.android.firebaseauth.R
+import dev.filipebezerra.android.firebaseauth.util.ext.postEvent
+import dev.filipebezerra.android.firebaseauth.util.livedata.FirebaseUserLiveData
+import dev.filipebezerra.android.firebaseauth.util.observable.Event
 import kotlin.random.Random
 
 class LoginViewModel : ViewModel() {
@@ -46,14 +53,43 @@ class LoginViewModel : ViewModel() {
         AUTHENTICATED, UNAUTHENTICATED, INVALID_AUTHENTICATION
     }
 
-    val authenticationState = FirebaseUserLiveData().map { currentUser ->
-        when {
-            currentUser == null -> AuthenticationState.UNAUTHENTICATED
-            currentUser.providerData.any { it.providerId == "phone" } &&
-                    (currentUser.displayName.isNullOrBlank() || currentUser.email.isNullOrBlank()) -> {
-                AuthenticationState.INVALID_AUTHENTICATION
+    val authenticationState = MediatorLiveData<AuthenticationState>()
+
+    private val firebaseUser = FirebaseUserLiveData()
+
+    private val _snackbarText = MutableLiveData<Event<Int>>()
+    val snackbarText: LiveData<Event<Int>>
+        get() = _snackbarText
+
+    private val _isUpdatingProfile = MutableLiveData<Boolean>()
+    val isUpdatingProfile: LiveData<Boolean>
+        get() = _isUpdatingProfile
+
+    init {
+        authenticationState.apply {
+            addFirebaseUserAsSource()
+            addSnackbarTextAsSource()
+        }
+    }
+
+    private fun MediatorLiveData<AuthenticationState>.addFirebaseUserAsSource() {
+        addSource(firebaseUser) { currentUser ->
+            authenticationState.value = when {
+                currentUser == null -> AuthenticationState.UNAUTHENTICATED
+                currentUser.providerData.any { it.providerId == "phone" } &&
+                        currentUser.displayName.isNullOrBlank() -> {
+                    AuthenticationState.INVALID_AUTHENTICATION
+                }
+                else -> AuthenticationState.AUTHENTICATED
             }
-            else -> AuthenticationState.AUTHENTICATED
+        }
+    }
+
+    private fun MediatorLiveData<AuthenticationState>.addSnackbarTextAsSource() {
+        addSource(snackbarText) {
+            if (it.peekContent() == R.string.profile_updated_successfully) {
+                authenticationState.value = AuthenticationState.AUTHENTICATED
+            }
         }
     }
 
@@ -69,5 +105,23 @@ class LoginViewModel : ViewModel() {
         val funFactType = sharedPreferences.getString(factTypePreferenceKey, defaultFactType)
 
         return androidFacts[Random.nextInt(0, androidFacts.size)]
+    }
+
+    fun updateDisplayName(text: CharSequence) {
+        val profileUpdates = UserProfileChangeRequest.Builder()
+            .setDisplayName(text.toString())
+            .build()
+        Firebase.auth.currentUser?.run {
+            _isUpdatingProfile.value = true
+            updateProfile(profileUpdates).addOnCompleteListener {
+                _isUpdatingProfile.value = false
+                it.takeIf { it.isSuccessful }?.let {
+                    _snackbarText.postEvent(R.string.profile_updated_successfully)
+                }
+                it.takeUnless { it.isSuccessful }?.let {
+                    _snackbarText.postEvent(R.string.profile_update_failed)
+                }
+            }
+        }
     }
 }
