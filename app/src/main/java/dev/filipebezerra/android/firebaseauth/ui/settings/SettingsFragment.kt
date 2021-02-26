@@ -19,17 +19,14 @@ package dev.filipebezerra.android.firebaseauth.ui.settings
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.preference.PreferenceFragmentCompat
 import dev.filipebezerra.android.firebaseauth.R
 import dev.filipebezerra.android.firebaseauth.ui.login.LoginViewModel
+import dev.filipebezerra.android.firebaseauth.ui.login.LoginViewModel.AuthenticationState
+import dev.filipebezerra.android.firebaseauth.NavGraphDirections.Companion.actionLogin as toLogin
 
 class SettingsFragment : PreferenceFragmentCompat() {
-
-    companion object {
-        const val TAG = "SettingsFragment"
-    }
-
-    // Get a reference to the ViewModel scoped to this Fragment
     private val viewModel by viewModels<LoginViewModel>()
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -38,5 +35,11 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        viewModel.authenticationState.observe(viewLifecycleOwner) {
+            when(it) {
+                AuthenticationState.UNAUTHENTICATED ->
+                    findNavController().navigate(toLogin())
+            }
+        }
     }
 }

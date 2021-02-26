@@ -25,14 +25,27 @@
     <fragment
         android:id="@+id/mainFragment"
         android:name="dev.filipebezerra.android.firebaseauth.MainFragment"
-        />
+        tools:layout="@layout/fragment_main"
+        >
+        <action
+            android:id="@+id/action_main_to_settings"
+            app:destination="@id/settingsFragment"
+            />
+    </fragment>
+
     <fragment
         android:id="@+id/settingsFragment"
         android:name="dev.filipebezerra.android.firebaseauth.ui.settings.SettingsFragment"
         />
+
     <fragment
         android:id="@+id/loginFragment"
         android:name="dev.filipebezerra.android.firebaseauth.ui.login.LoginFragment"
         tools:layout="@layout/fragment_login"
+        />
+
+    <action
+        android:id="@+id/action_login"
+        app:destination="@id/loginFragment"
         />
 </navigation>

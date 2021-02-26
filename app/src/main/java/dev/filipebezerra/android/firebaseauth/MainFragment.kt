@@ -27,16 +27,19 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.input.input
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.IdpResponse
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
-import dev.filipebezerra.android.firebaseauth.ui.login.LoginViewModel.AuthenticationState.*
 import dev.filipebezerra.android.firebaseauth.databinding.FragmentMainBinding
 import dev.filipebezerra.android.firebaseauth.ui.login.LoginViewModel
+import dev.filipebezerra.android.firebaseauth.ui.login.LoginViewModel.AuthenticationState.*
+import dev.filipebezerra.android.firebaseauth.util.ext.launchSignInFlow
 import dev.filipebezerra.android.firebaseauth.util.ext.setupSnackbar
+import dev.filipebezerra.android.firebaseauth.MainFragmentDirections.Companion.actionMainToSettings as toSettings
 
 class MainFragment : Fragment() {
 
@@ -68,6 +71,9 @@ class MainFragment : Fragment() {
             viewModel.snackbarText,
             Snackbar.LENGTH_LONG
         )
+        binding.settingsButton.setOnClickListener {
+            findNavController().navigate(toSettings())
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -142,27 +148,6 @@ class MainFragment : Fragment() {
                 FirebaseAuth.getInstance().currentUser?.displayName,
                 Character.toLowerCase(fact[0]) + fact.substring(1)
             )
-        )
-    }
-
-    private fun launchSignInFlow() {
-        val providers = listOf(
-            AuthUI.IdpConfig.GoogleBuilder().build(),
-            AuthUI.IdpConfig.PhoneBuilder().build(),
-            AuthUI.IdpConfig.EmailBuilder().build()
-        )
-        startActivityForResult(
-            AuthUI.getInstance().createSignInIntentBuilder()
-                .setAvailableProviders(providers)
-                .setLogo(R.mipmap.ic_launcher_round)
-                .setTosAndPrivacyPolicyUrls(
-                    "https://policies.google.com/terms",
-                    "https://policies.google.com/privacy"
-                )
-                .setTheme(R.style.AppTheme)
-                .setLockOrientation(true)
-                .build(),
-            SIGN_IN_RESULT_CODE
         )
     }
 
